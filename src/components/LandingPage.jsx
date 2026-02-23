@@ -1,0 +1,337 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
+export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick }) {
+  return (
+    <div className="min-h-screen bg-slate-950 text-white">
+      {/* Navigation */}
+      <nav className="flex items-center justify-between px-6 py-4 md:px-12 lg:px-20">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-gradient-to-br from-teal-400 to-teal-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">T</span>
+          </div>
+          <span className="text-xl font-semibold text-white">TrustRoom</span>
+        </div>
+        <div className="hidden md:flex items-center gap-8">
+          <a href="#how-it-works" className="text-slate-400 hover:text-white transition-colors">How It Works</a>
+          <a href="#features" className="text-slate-400 hover:text-white transition-colors">Features</a>
+          <a href="#submit" className="text-slate-400 hover:text-white transition-colors">Submit</a>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="px-6 py-16 md:px-12 md:py-24 lg:px-20 lg:py-32">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Trust Badge */}
+          <div className="inline-flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-full px-4 py-2 mb-8">
+            <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse"></div>
+            <span className="text-sm text-slate-300">100% Anonymous • No Tracking • Your Identity Protected</span>
+          </div>
+
+          {/* Main Headline */}
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+            Your Voice Matters.
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400">
+              Even When No One Knows It's Yours.
+            </span>
+          </h1>
+
+          {/* Subheadline */}
+          <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10">
+            A safe, anonymous space for employees to speak up about workplace issues — 
+            without fear of judgement, retaliation, or consequences.
+          </p>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              size="lg" 
+              onClick={onSubmitClick}
+              className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-teal-500/20"
+            >
+              Share Your Voice →
+            </Button>
+            <Button 
+              variant="outline" 
+              size="lg"
+              onClick={onTrackClick}
+              className="border-slate-700 text-slate-300 hover:bg-slate-800 px-8 py-6 text-lg rounded-xl"
+            >
+              Track Your Submission
+            </Button>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="flex flex-wrap justify-center gap-8 mt-12 text-sm text-slate-500">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <span>End-to-End Encrypted</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <span>No Login Required</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              <span>Identity Never Stored</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Problem Section */}
+      <section className="px-6 py-16 md:px-12 lg:px-20 bg-slate-900/50">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">
+            The Problem We're Solving
+          </h2>
+          <p className="text-slate-400 text-lg mb-12 max-w-2xl mx-auto">
+            Every day, employees stay silent about issues that affect their work, their wellbeing, and their careers. 
+            Not because they don't care — but because speaking up feels too risky.
+          </p>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { stat: "76%", label: "of employees have stayed silent about a workplace issue out of fear" },
+              { stat: "82%", label: "don't trust HR to handle concerns confidentially" },
+              { stat: "91%", label: "say workplace issues affect their mental health" },
+            ].map((item, i) => (
+              <Card key={i} className="bg-slate-800/50 border-slate-700">
+                <CardContent className="pt-6 pb-6">
+                  <div className="text-4xl font-bold text-teal-400 mb-2">{item.stat}</div>
+                  <p className="text-slate-400 text-sm">{item.label}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
+          <p className="text-slate-500 text-sm mt-6">
+            *Based on workplace research across Indian organizations
+          </p>
+        </div>
+      </section>
+
+      {/* Categories Section */}
+      <section className="px-6 py-16 md:px-12 lg:px-20">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">
+              What Can You Report?
+            </h2>
+            <p className="text-slate-400">
+              Anything that affects your work experience. Here are some common categories:
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { icon: "⚖️", title: "Unfair Treatment", desc: "Favouritism, bias, or discrimination" },
+              { icon: "😰", title: "Toxic Behaviour", desc: "Bullying, harassment, or disrespect" },
+              { icon: "📊", title: "Workload Issues", desc: "Unrealistic expectations or burnout" },
+              { icon: "🎭", title: "Office Politics", desc: "Power plays affecting your career" },
+              { icon: "🧠", title: "Mental Health", desc: "Work-related stress or anxiety" },
+              { icon: "💬", title: "Manager Feedback", desc: "Issues with leadership behaviour" },
+              { icon: "🚫", title: "Policy Violations", desc: "Rules being broken or ignored" },
+              { icon: "💡", title: "Suggestions", desc: "Ideas to improve the workplace" },
+            ].map((item, i) => (
+              <div 
+                key={i} 
+                className="bg-slate-800/30 border border-slate-800 rounded-xl p-4 hover:border-teal-500/50 hover:bg-slate-800/50 transition-all cursor-pointer"
+              >
+                <span className="text-2xl mb-2 block">{item.icon}</span>
+                <h3 className="font-semibold text-white mb-1">{item.title}</h3>
+                <p className="text-slate-500 text-sm">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="how-it-works" className="px-6 py-16 md:px-12 lg:px-20 bg-slate-900/50">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">
+              How It Works
+            </h2>
+            <p className="text-slate-400">
+              Three simple steps. No accounts. No identity. Just your voice.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                step: "01",
+                title: "Share Anonymously",
+                desc: "Describe your concern. Choose a category. No name, no email, no login required.",
+                icon: (
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                ),
+              },
+              {
+                step: "02",
+                title: "Get a Tracking Code",
+                desc: "Receive a unique code. Use it to check your submission status anytime — still anonymous.",
+                icon: (
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                  </svg>
+                ),
+              },
+              {
+                step: "03",
+                title: "Action Is Taken",
+                desc: "Your concern reaches the right people. Track progress. See that your voice made a difference.",
+                icon: (
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                ),
+              },
+            ].map((item, i) => (
+              <div key={i} className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-teal-500/20 to-cyan-500/20 rounded-2xl flex items-center justify-center text-teal-400">
+                  {item.icon}
+                </div>
+                <div className="text-teal-400 text-sm font-semibold mb-2">{item.step}</div>
+                <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                <p className="text-slate-400 text-sm">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Features */}
+      <section id="features" className="px-6 py-16 md:px-12 lg:px-20">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">
+              Your Privacy Is Not Negotiable
+            </h2>
+            <p className="text-slate-400">
+              We built TrustRoom with one principle: your identity stays yours.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {[
+              {
+                title: "No Login Required",
+                desc: "No email. No phone number. No account. Just open and share.",
+                icon: "🔓",
+              },
+              {
+                title: "Zero Data Collection",
+                desc: "We don't store IP addresses, device info, or any identifying data.",
+                icon: "🚫",
+              },
+              {
+                title: "End-to-End Encryption",
+                desc: "Your submission is encrypted. Only authorized reviewers can read it.",
+                icon: "🔐",
+              },
+              {
+                title: "Anonymous Tracking",
+                desc: "Follow up on your submission using a code — without ever revealing who you are.",
+                icon: "🎫",
+              },
+              {
+                title: "Third-Party Managed",
+                desc: "TrustRoom operates independently, not controlled by your HR or management.",
+                icon: "🏛️",
+              },
+              {
+                title: "Transparent Process",
+                desc: "See what happens to reports. Know that action is being taken.",
+                icon: "👁️",
+              },
+            ].map((item, i) => (
+              <div 
+                key={i} 
+                className="flex gap-4 p-4 rounded-xl bg-slate-800/30 border border-slate-800"
+              >
+                <div className="text-2xl">{item.icon}</div>
+                <div>
+                  <h3 className="font-semibold text-white mb-1">{item.title}</h3>
+                  <p className="text-slate-400 text-sm">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Statement */}
+      <section className="px-6 py-16 md:px-12 lg:px-20 bg-slate-900/50">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="text-5xl mb-6">🛡️</div>
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">
+            Our Promise to You
+          </h2>
+          <p className="text-slate-300 text-lg leading-relaxed">
+            "We will never know who you are. We will never try to find out. 
+            Your submission cannot be traced back to you — not by us, not by your company, not by anyone. 
+            <span className="text-teal-400 font-medium"> Your courage to speak deserves complete protection.</span>"
+          </p>
+          <p className="text-slate-500 mt-6 text-sm">
+            — The TrustRoom Team
+          </p>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section id="submit" className="px-6 py-20 md:px-12 lg:px-20">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            Ready to Be Heard?
+          </h2>
+          <p className="text-slate-400 text-lg mb-8">
+            Your voice can change things. And no one has to know it was you.
+          </p>
+          <Button 
+            size="lg" 
+            onClick={onSubmitClick}
+            className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-10 py-7 text-xl rounded-xl shadow-lg shadow-teal-500/25"
+          >
+            Share Your Voice Anonymously →
+          </Button>
+          <p className="text-slate-600 text-sm mt-6">
+            No login • No email • No tracking • Just your truth
+          </p>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="px-6 py-8 md:px-12 lg:px-20 border-t border-slate-800">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-gradient-to-br from-teal-400 to-teal-600 rounded-md flex items-center justify-center">
+              <span className="text-white font-bold text-xs">T</span>
+            </div>
+            <span className="text-slate-400">TrustRoom</span>
+          </div>
+          <p className="text-slate-600 text-sm">
+            Because every employee deserves to be heard.
+          </p>
+          <div className="flex gap-6 text-sm text-slate-500">
+            <a href="#" className="hover:text-slate-300">Privacy</a>
+            <a href="#" className="hover:text-slate-300">Terms</a>
+            <a href="#" className="hover:text-slate-300">Contact</a>
+            <button onClick={onAdminClick} className="hover:text-slate-300">Admin</button>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
