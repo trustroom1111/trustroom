@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick }) {
+export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick, onLogoClick }) {
   
   const categories = [
     { 
@@ -82,12 +82,12 @@ export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick 
     <div className="min-h-screen bg-slate-950 text-white">
       {/* Navigation */}
       <nav className="flex items-center justify-between px-6 py-4 md:px-12 lg:px-20">
-        <div className="flex items-center gap-2">
+        <button onClick={onLogoClick} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 bg-gradient-to-br from-teal-400 to-teal-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">T</span>
           </div>
           <span className="text-xl font-semibold text-white">TrustRoom</span>
-        </div>
+        </button>
         <div className="hidden md:flex items-center gap-8">
           <a href="#psychological-safety" className="text-slate-400 hover:text-white transition-colors">Why It Matters</a>
           <a href="#how-it-works" className="text-slate-400 hover:text-white transition-colors">How It Works</a>
@@ -163,7 +163,7 @@ export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick 
         </div>
       </section>
 
-      {/* Psychological Safety Section - NEW */}
+      {/* Psychological Safety Section */}
       <section id="psychological-safety" className="px-6 py-16 md:px-12 lg:px-20 bg-slate-900/50">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
@@ -250,7 +250,7 @@ export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick 
         </div>
       </section>
 
-      {/* Why Employees Stay Silent - NEW */}
+      {/* Why Employees Stay Silent */}
       <section className="px-6 py-16 md:px-12 lg:px-20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
@@ -347,7 +347,7 @@ export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick 
         </div>
       </section>
 
-      {/* How TrustRoom Creates Safety - NEW */}
+      {/* How TrustRoom Creates Safety */}
       <section className="px-6 py-16 md:px-12 lg:px-20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">

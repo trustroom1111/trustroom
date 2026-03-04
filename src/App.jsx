@@ -5,6 +5,7 @@ import ConfirmationPage from "./components/ConfirmationPage";
 import AdminLogin from "./components/AdminLogin";
 import AdminDashboard from "./components/AdminDashboard";
 import TrackSubmission from "./components/TrackSubmission";
+import AboutPage from "./components/AboutPage";
 
 function App() {
   const [currentPage, setCurrentPage] = useState("landing");
@@ -30,11 +31,22 @@ function App() {
     setCurrentPage("landing");
   };
 
+  // About Page
+  if (currentPage === "about") {
+    return (
+      <AboutPage 
+        onBackHome={() => setCurrentPage("landing")}
+        onSubmitClick={() => setCurrentPage("form")}
+      />
+    );
+  }
+
   // Track Submission Page
   if (currentPage === "track") {
     return (
       <TrackSubmission 
-        onBackHome={() => setCurrentPage("landing")} 
+        onBackHome={() => setCurrentPage("landing")}
+        onLogoClick={() => setCurrentPage("about")}
       />
     );
   }
@@ -44,7 +56,8 @@ function App() {
     if (isAdminLoggedIn) {
       return (
         <AdminDashboard 
-          onLogout={handleAdminLogout} 
+          onLogout={handleAdminLogout}
+          onLogoClick={() => setCurrentPage("about")}
         />
       );
     } else {
@@ -52,6 +65,7 @@ function App() {
         <AdminLogin 
           onLoginSuccess={() => setIsAdminLoggedIn(true)}
           onBack={() => setCurrentPage("landing")}
+          onLogoClick={() => setCurrentPage("about")}
         />
       );
     }
@@ -62,7 +76,8 @@ function App() {
     return (
       <ConfirmationPage 
         trackingCode={trackingCode} 
-        onBackHome={() => setCurrentPage("landing")} 
+        onBackHome={() => setCurrentPage("landing")}
+        onLogoClick={() => setCurrentPage("about")}
       />
     );
   }
@@ -73,6 +88,7 @@ function App() {
       <SubmissionForm 
         onBack={() => setCurrentPage("landing")} 
         onSubmitSuccess={handleSubmitSuccess}
+        onLogoClick={() => setCurrentPage("about")}
       />
     );
   }
@@ -83,6 +99,7 @@ function App() {
       onSubmitClick={() => setCurrentPage("form")} 
       onAdminClick={() => setCurrentPage("admin")}
       onTrackClick={() => setCurrentPage("track")}
+      onLogoClick={() => setCurrentPage("about")}
     />
   );
 }
