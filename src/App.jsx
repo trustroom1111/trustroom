@@ -12,7 +12,6 @@ function App() {
   const [trackingCode, setTrackingCode] = useState("");
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
-  // Check if admin is already logged in
   useEffect(() => {
     const adminStatus = localStorage.getItem("trustroom_admin");
     if (adminStatus === "true") {
@@ -31,12 +30,19 @@ function App() {
     setCurrentPage("landing");
   };
 
+  const goHome = () => setCurrentPage("landing");
+  const goAbout = () => setCurrentPage("about");
+  const goForm = () => setCurrentPage("form");
+  const goTrack = () => setCurrentPage("track");
+  const goAdmin = () => setCurrentPage("admin");
+
   // About Page
   if (currentPage === "about") {
     return (
       <AboutPage 
-        onBackHome={() => setCurrentPage("landing")}
-        onSubmitClick={() => setCurrentPage("form")}
+        onBackHome={goHome}
+        onSubmitClick={goForm}
+        onLogoClick={goHome}
       />
     );
   }
@@ -45,8 +51,8 @@ function App() {
   if (currentPage === "track") {
     return (
       <TrackSubmission 
-        onBackHome={() => setCurrentPage("landing")}
-        onLogoClick={() => setCurrentPage("about")}
+        onBackHome={goHome}
+        onLogoClick={goHome}
       />
     );
   }
@@ -57,15 +63,15 @@ function App() {
       return (
         <AdminDashboard 
           onLogout={handleAdminLogout}
-          onLogoClick={() => setCurrentPage("about")}
+          onLogoClick={goHome}
         />
       );
     } else {
       return (
         <AdminLogin 
           onLoginSuccess={() => setIsAdminLoggedIn(true)}
-          onBack={() => setCurrentPage("landing")}
-          onLogoClick={() => setCurrentPage("about")}
+          onBack={goHome}
+          onLogoClick={goHome}
         />
       );
     }
@@ -76,8 +82,8 @@ function App() {
     return (
       <ConfirmationPage 
         trackingCode={trackingCode} 
-        onBackHome={() => setCurrentPage("landing")}
-        onLogoClick={() => setCurrentPage("about")}
+        onBackHome={goHome}
+        onLogoClick={goHome}
       />
     );
   }
@@ -86,9 +92,9 @@ function App() {
   if (currentPage === "form") {
     return (
       <SubmissionForm 
-        onBack={() => setCurrentPage("landing")} 
+        onBack={goHome} 
         onSubmitSuccess={handleSubmitSuccess}
-        onLogoClick={() => setCurrentPage("about")}
+        onLogoClick={goHome}
       />
     );
   }
@@ -96,10 +102,11 @@ function App() {
   // Landing Page
   return (
     <LandingPage 
-      onSubmitClick={() => setCurrentPage("form")} 
-      onAdminClick={() => setCurrentPage("admin")}
-      onTrackClick={() => setCurrentPage("track")}
-      onLogoClick={() => setCurrentPage("about")}
+      onSubmitClick={goForm} 
+      onAdminClick={goAdmin}
+      onTrackClick={goTrack}
+      onLogoClick={goHome}
+      onAboutClick={goAbout}
     />
   );
 }

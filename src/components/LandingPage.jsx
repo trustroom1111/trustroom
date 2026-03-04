@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick, onLogoClick }) {
+export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick, onLogoClick, onAboutClick }) {
   
   const categories = [
     { 
@@ -89,7 +89,7 @@ export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick,
           <span className="text-xl font-semibold text-white">TrustRoom</span>
         </button>
         <div className="hidden md:flex items-center gap-8">
-          <a href="#psychological-safety" className="text-slate-400 hover:text-white transition-colors">Why It Matters</a>
+          <button onClick={onAboutClick} className="text-slate-400 hover:text-white transition-colors">About</button>
           <a href="#how-it-works" className="text-slate-400 hover:text-white transition-colors">How It Works</a>
           <a href="#features" className="text-slate-400 hover:text-white transition-colors">Features</a>
           <a href="#submit" className="text-slate-400 hover:text-white transition-colors">Submit</a>
@@ -99,13 +99,11 @@ export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick,
       {/* Hero Section */}
       <section className="px-6 py-16 md:px-12 md:py-24 lg:px-20 lg:py-32">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Trust Badge */}
           <div className="inline-flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-full px-4 py-2 mb-8">
             <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse"></div>
             <span className="text-sm text-slate-300">100% Anonymous • No Tracking • Your Identity Protected</span>
           </div>
 
-          {/* Main Headline */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
             Your Voice Matters.
             <br />
@@ -114,13 +112,11 @@ export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick,
             </span>
           </h1>
 
-          {/* Subheadline */}
           <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10">
             A safe, anonymous space for employees to speak up about workplace issues — 
             without fear of judgement, retaliation, or consequences.
           </p>
 
-          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
@@ -139,7 +135,6 @@ export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick,
             </Button>
           </div>
 
-          {/* Trust Indicators */}
           <div className="flex flex-wrap justify-center gap-8 mt-12 text-sm text-slate-500">
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,244 +154,6 @@ export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick,
               </svg>
               <span>Identity Never Stored</span>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Psychological Safety Section */}
-      <section id="psychological-safety" className="px-6 py-16 md:px-12 lg:px-20 bg-slate-900/50">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
-              What is Psychological Safety?
-            </h2>
-            <p className="text-slate-400 text-lg max-w-3xl mx-auto">
-              Psychological safety is the belief that you won't be punished or humiliated for speaking up with ideas, questions, concerns, or mistakes.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            {/* Without Psychological Safety */}
-            <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold text-red-400">Without Psychological Safety</h3>
-              </div>
-              <ul className="space-y-3">
-                {[
-                  "Employees stay silent about problems",
-                  "Issues escalate until they're crises",
-                  "Good people leave without explaining why",
-                  "Innovation dies — no one takes risks",
-                  "Mental health suffers in silence",
-                  "Toxic behaviours go unreported",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-slate-400 text-sm">
-                    <svg className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* With Psychological Safety */}
-            <div className="bg-teal-500/5 border border-teal-500/20 rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-teal-500/10 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold text-teal-400">With Psychological Safety</h3>
-              </div>
-              <ul className="space-y-3">
-                {[
-                  "Employees speak up about concerns early",
-                  "Problems are caught before they grow",
-                  "Talent stays and thrives",
-                  "Teams innovate and take smart risks",
-                  "People bring their whole selves to work",
-                  "A culture of trust and respect grows",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-slate-400 text-sm">
-                    <svg className="w-4 h-4 text-teal-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Quote */}
-          <div className="bg-slate-800/30 border border-slate-700 rounded-2xl p-6 md:p-8 text-center">
-            <svg className="w-10 h-10 text-teal-400/30 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-            </svg>
-            <p className="text-slate-300 text-lg md:text-xl leading-relaxed mb-4">
-              "In a psychologically safe workplace, employees feel confident that they can speak up without fear of embarrassment, rejection, or punishment."
-            </p>
-            <p className="text-slate-500 text-sm">
-              — Dr. Amy Edmondson, Harvard Business School
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Employees Stay Silent */}
-      <section className="px-6 py-16 md:px-12 lg:px-20">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
-              Why Employees Stay Silent
-            </h2>
-            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-              It's not that employees don't care. It's that the risks of speaking up feel too high.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { 
-                title: "Fear of Retaliation", 
-                desc: "Worried about losing their job, missing promotions, or being sidelined",
-                icon: (
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                )
-              },
-              { 
-                title: "Distrust in HR", 
-                desc: "Belief that HR protects the company, not employees",
-                icon: (
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-                  </svg>
-                )
-              },
-              { 
-                title: "Social Pressure", 
-                desc: "Fear of being seen as a troublemaker or not a team player",
-                icon: (
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                )
-              },
-              { 
-                title: "Past Experience", 
-                desc: "Previous attempts to speak up were ignored or backfired",
-                icon: (
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                )
-              },
-            ].map((item, i) => (
-              <div 
-                key={i} 
-                className="bg-slate-800/30 border border-slate-800 rounded-xl p-5"
-              >
-                <div className="w-10 h-10 bg-slate-700/50 rounded-lg flex items-center justify-center text-slate-400 mb-3">
-                  {item.icon}
-                </div>
-                <h3 className="font-semibold text-white mb-1">{item.title}</h3>
-                <p className="text-slate-500 text-sm">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* The Cost of Silence - Statistics */}
-      <section className="px-6 py-16 md:px-12 lg:px-20 bg-slate-900/50">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-6">
-            The Cost of Silence
-          </h2>
-          <p className="text-slate-400 text-lg mb-12 max-w-2xl mx-auto">
-            When employees can't speak up safely, everyone pays the price — individuals, teams, and organizations.
-          </p>
-          
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { stat: "76%", label: "of employees have stayed silent about a workplace issue out of fear" },
-              { stat: "82%", label: "don't trust HR to handle concerns confidentially" },
-              { stat: "91%", label: "say workplace issues affect their mental health" },
-            ].map((item, i) => (
-              <Card key={i} className="bg-slate-800/50 border-slate-700">
-                <CardContent className="pt-6 pb-6">
-                  <div className="text-4xl font-bold text-teal-400 mb-2">{item.stat}</div>
-                  <p className="text-slate-400 text-sm">{item.label}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          
-          <p className="text-slate-500 text-sm mt-6">
-            *Based on workplace research across Indian organizations
-          </p>
-        </div>
-      </section>
-
-      {/* How TrustRoom Creates Safety */}
-      <section className="px-6 py-16 md:px-12 lg:px-20">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
-              How TrustRoom Creates Safety
-            </h2>
-            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-              We remove every barrier that keeps employees from speaking up.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                title: "Complete Anonymity",
-                desc: "No login, no email, no IP tracking. We literally cannot know who you are — and that's by design.",
-                icon: (
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                ),
-              },
-              {
-                title: "Independent Platform",
-                desc: "TrustRoom is not controlled by your HR or management. We exist to serve employees, not protect companies.",
-                icon: (
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                ),
-              },
-              {
-                title: "Transparent Follow-up",
-                desc: "Track your submission's progress with a code. See that your voice led to action — without revealing yourself.",
-                icon: (
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                  </svg>
-                ),
-              },
-            ].map((item, i) => (
-              <div key={i} className="bg-slate-800/30 border border-slate-800 rounded-xl p-6 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-teal-500/20 to-cyan-500/20 rounded-2xl flex items-center justify-center text-teal-400">
-                  {item.icon}
-                </div>
-                <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
-                <p className="text-slate-400 text-sm">{item.desc}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -538,25 +295,6 @@ export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick,
                   </svg>
                 ),
               },
-              {
-                title: "Third-Party Managed",
-                desc: "TrustRoom operates independently, not controlled by your HR or management.",
-                icon: (
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                ),
-              },
-              {
-                title: "Transparent Process",
-                desc: "See what happens to reports. Know that action is being taken.",
-                icon: (
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                ),
-              },
             ].map((item, i) => (
               <div 
                 key={i} 
@@ -632,9 +370,9 @@ export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick,
             Because every employee deserves to be heard.
           </p>
           <div className="flex gap-6 text-sm text-slate-500">
+            <button onClick={onAboutClick} className="hover:text-slate-300">About</button>
             <a href="#" className="hover:text-slate-300">Privacy</a>
             <a href="#" className="hover:text-slate-300">Terms</a>
-            <a href="#" className="hover:text-slate-300">Contact</a>
             <button onClick={onAdminClick} className="hover:text-slate-300">Admin</button>
           </div>
         </div>
