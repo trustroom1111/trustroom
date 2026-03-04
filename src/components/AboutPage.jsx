@@ -1,26 +1,29 @@
 import { Button } from "@/components/ui/button";
 
-export default function AboutPage({ onBackHome, onSubmitClick }) {
+export default function AboutPage({ onBackHome, onSubmitClick, onLogoClick }) {
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      {/* Header */}
-      <header className="px-6 py-4 md:px-12 lg:px-20 border-b border-slate-800">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-teal-400 to-teal-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">T</span>
-            </div>
-            <span className="text-xl font-semibold text-white">TrustRoom</span>
+      {/* Navigation */}
+      <nav className="flex items-center justify-between px-6 py-4 md:px-12 lg:px-20">
+        <button onClick={onLogoClick} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <div className="w-8 h-8 bg-gradient-to-br from-teal-400 to-teal-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">T</span>
           </div>
-          <Button
-            onClick={onBackHome}
-            variant="outline"
-            className="border-slate-700 text-slate-400 hover:bg-slate-800"
+          <span className="text-xl font-semibold text-white">TrustRoom</span>
+        </button>
+        <div className="hidden md:flex items-center gap-8">
+          <span className="text-teal-400 font-medium">About</span>
+          <a href="#mission" className="text-slate-400 hover:text-white transition-colors">Mission</a>
+          <a href="#psychological-safety" className="text-slate-400 hover:text-white transition-colors">Psychological Safety</a>
+          <a href="#what-we-provide" className="text-slate-400 hover:text-white transition-colors">What We Provide</a>
+          <Button 
+            onClick={onSubmitClick}
+            className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-4 py-2 rounded-lg"
           >
-            ← Back to Home
+            Share Your Voice
           </Button>
         </div>
-      </header>
+      </nav>
 
       {/* Hero Section */}
       <section className="px-6 py-16 md:px-12 md:py-20 lg:px-20">
@@ -35,7 +38,7 @@ export default function AboutPage({ onBackHome, onSubmitClick }) {
       </section>
 
       {/* Our Mission */}
-      <section className="px-6 py-12 md:px-12 lg:px-20 bg-slate-900/50">
+      <section id="mission" className="px-6 py-12 md:px-12 lg:px-20 bg-slate-900/50">
         <div className="max-w-4xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
@@ -66,7 +69,7 @@ export default function AboutPage({ onBackHome, onSubmitClick }) {
       </section>
 
       {/* What is Psychological Safety */}
-      <section className="px-6 py-16 md:px-12 lg:px-20">
+      <section id="psychological-safety" className="px-6 py-16 md:px-12 lg:px-20">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold mb-4">
@@ -205,7 +208,7 @@ export default function AboutPage({ onBackHome, onSubmitClick }) {
       </section>
 
       {/* What TrustRoom Provides */}
-      <section className="px-6 py-16 md:px-12 lg:px-20">
+      <section id="what-we-provide" className="px-6 py-16 md:px-12 lg:px-20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold mb-4">
@@ -377,12 +380,12 @@ export default function AboutPage({ onBackHome, onSubmitClick }) {
       {/* Footer */}
       <footer className="px-6 py-8 md:px-12 lg:px-20 border-t border-slate-800">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
+          <button onClick={onLogoClick} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <div className="w-6 h-6 bg-gradient-to-br from-teal-400 to-teal-600 rounded-md flex items-center justify-center">
               <span className="text-white font-bold text-xs">T</span>
             </div>
             <span className="text-slate-400">TrustRoom</span>
-          </div>
+          </button>
           <p className="text-slate-600 text-sm">
             Because every employee deserves to be heard.
           </p>
