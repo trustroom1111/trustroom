@@ -1,17 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LandingPage from "./components/LandingPage";
 import SubmissionForm from "./components/SubmissionForm";
 import ConfirmationPage from "./components/ConfirmationPage";
+import AdminLogin from "./components/AdminLogin";
 import AdminDashboard from "./components/AdminDashboard";
 import TrackSubmission from "./components/TrackSubmission";
 
 function App() {
   const [currentPage, setCurrentPage] = useState("landing");
   const [trackingCode, setTrackingCode] = useState("");
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+
+  // Check if admin is already logged in
+  useEffect(() => {
+    const adminStatus = localStorage.getItem("trustroom_admin");
+    if (adminStatus === "true") {
+      setIsAdminLoggedIn(true);
+    }
+  }, []);
 
   const handleSubmitSuccess = (code) => {
     setTrackingCode(code);
     setCurrentPage("confirmation");
+  };
+
+  const handleAdminLogout = () => {
+    localStorage.removeItem("trustroom_admin");
+    setIsAdminLoggedIn(false);
+    setCurrentPage("landing");
   };
 
   // Track Submission Page
@@ -23,13 +39,22 @@ function App() {
     );
   }
 
-  // Admin Dashboard
+  // Admin Pages
   if (currentPage === "admin") {
-    return (
-      <AdminDashboard 
-        onLogout={() => setCurrentPage("landing")} 
-      />
-    );
+    if (isAdminLoggedIn) {
+      return (
+        <AdminDashboard 
+          onLogout={handleAdminLogout} 
+        />
+      );
+    } else {
+      return (
+        <AdminLogin 
+          onLoginSuccess={() => setIsAdminLoggedIn(true)}
+          onBack={() => setCurrentPage("landing")}
+        />
+      );
+    }
   }
 
   // Confirmation Page
