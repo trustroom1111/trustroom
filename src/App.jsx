@@ -6,6 +6,7 @@ import AdminLogin from "./components/AdminLogin";
 import AdminDashboard from "./components/AdminDashboard";
 import TrackSubmission from "./components/TrackSubmission";
 import AboutPage from "./components/AboutPage";
+import ForCompaniesPage from "./components/ForCompaniesPage";
 
 function App() {
   const [currentPage, setCurrentPage] = useState("landing");
@@ -35,6 +36,19 @@ function App() {
   const goForm = () => setCurrentPage("form");
   const goTrack = () => setCurrentPage("track");
   const goAdmin = () => setCurrentPage("admin");
+  const goForCompanies = () => setCurrentPage("for-companies");
+  const goCompanyRegister = () => setCurrentPage("company-register");
+
+  // For Companies Page
+  if (currentPage === "for-companies") {
+    return (
+      <ForCompaniesPage 
+        onLogoClick={goHome}
+        onAboutClick={goAbout}
+        onGetStarted={goCompanyRegister}
+      />
+    );
+  }
 
   // About Page
   if (currentPage === "about") {
@@ -107,6 +121,7 @@ function App() {
       onTrackClick={goTrack}
       onLogoClick={goHome}
       onAboutClick={goAbout}
+      onForCompaniesClick={goForCompanies}
     />
   );
 }

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick, onLogoClick, onAboutClick }) {
+export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick, onLogoClick, onAboutClick, onForCompaniesClick }) {
   
   const categories = [
     { 
@@ -90,8 +90,8 @@ export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick,
         </button>
         <div className="hidden md:flex items-center gap-8">
           <button onClick={onAboutClick} className="text-slate-400 hover:text-white transition-colors">About</button>
+          <button onClick={onForCompaniesClick} className="text-slate-400 hover:text-white transition-colors">For Companies</button>
           <a href="#how-it-works" className="text-slate-400 hover:text-white transition-colors">How It Works</a>
-          <a href="#features" className="text-slate-400 hover:text-white transition-colors">Features</a>
           <a href="#submit" className="text-slate-400 hover:text-white transition-colors">Submit</a>
         </div>
       </nav>
@@ -371,8 +371,8 @@ export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick,
           </p>
           <div className="flex gap-6 text-sm text-slate-500">
             <button onClick={onAboutClick} className="hover:text-slate-300">About</button>
+            <button onClick={onForCompaniesClick} className="hover:text-slate-300">For Companies</button>
             <a href="#" className="hover:text-slate-300">Privacy</a>
-            <a href="#" className="hover:text-slate-300">Terms</a>
             <button onClick={onAdminClick} className="hover:text-slate-300">Admin</button>
           </div>
         </div>
