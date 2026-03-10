@@ -11,6 +11,7 @@ import CompanyRegister from "./components/CompanyRegister";
 import CompanyRegisterSuccess from "./components/CompanyRegisterSuccess";
 import CompanyAdminLogin from "./components/CompanyAdminLogin";
 import CompanyDashboard from "./components/CompanyDashboard";
+import CompanySubmissionForm from "./components/CompanySubmissionForm";
 
 function App() {
   const [currentPage, setCurrentPage] = useState("landing");
@@ -18,8 +19,18 @@ function App() {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [registeredCompany, setRegisteredCompany] = useState({ code: "", name: "" });
   const [companyAdmin, setCompanyAdmin] = useState(null);
+  const [companyCode, setCompanyCode] = useState("");
 
   useEffect(() => {
+    // Check URL for company submission link
+    const path = window.location.pathname;
+    const submitMatch = path.match(/^\/submit\/([A-Za-z0-9]+)$/);
+    if (submitMatch) {
+      setCompanyCode(submitMatch[1]);
+      setCurrentPage("company-submit");
+      return;
+    }
+
     // Check super admin
     const adminStatus = localStorage.getItem("trustroom_admin");
     if (adminStatus === "true") {
@@ -36,6 +47,8 @@ function App() {
   const handleSubmitSuccess = (code) => {
     setTrackingCode(code);
     setCurrentPage("confirmation");
+    // Clear URL
+    window.history.pushState({}, "", "/");
   };
 
   const handleAdminLogout = () => {
@@ -61,7 +74,10 @@ function App() {
     setCurrentPage("landing");
   };
 
-  const goHome = () => setCurrentPage("landing");
+  const goHome = () => {
+    setCurrentPage("landing");
+    window.history.pushState({}, "", "/");
+  };
   const goAbout = () => setCurrentPage("about");
   const goForm = () => setCurrentPage("form");
   const goTrack = () => setCurrentPage("track");
@@ -69,6 +85,17 @@ function App() {
   const goForCompanies = () => setCurrentPage("for-companies");
   const goCompanyRegister = () => setCurrentPage("company-register");
   const goCompanyLogin = () => setCurrentPage("company-login");
+
+  // Company Submission Form (from URL)
+  if (currentPage === "company-submit" && companyCode) {
+    return (
+      <CompanySubmissionForm
+        companyCode={companyCode}
+        onSuccess={handleSubmitSuccess}
+        onLogoClick={goHome}
+      />
+    );
+  }
 
   // Company Dashboard
   if (currentPage === "company-dashboard" && companyAdmin) {
