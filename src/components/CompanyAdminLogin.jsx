@@ -14,44 +14,53 @@ export default function CompanyAdminLogin({ onLogoClick, onLoginSuccess, onBack,
     setIsLoading(true);
 
     try {
-      // Debug: Log what we're searching for
-      console.log("Searching for email:", email);
-      console.log("Searching for password:", password);
-
-      // First, let's find by email only
-      const { data: allAdmins, error: fetchError } = await supabase
+      // Find admin by email
+      const { data: adminData, error: adminError } = await supabase
         .from("company_admins")
-        .select("*, companies(*)")
-        .eq("email", email.trim());
+        .select("*")
+        .eq("email", email.trim())
+        .single();
 
-      console.log("Found admins:", allAdmins);
-      console.log("Fetch error:", fetchError);
+      console.log("Admin data:", adminData);
+      console.log("Admin error:", adminError);
 
-      if (fetchError) {
-        setError("Database error. Please try again.");
-        setIsLoading(false);
-        return;
-      }
-
-      if (!allAdmins || allAdmins.length === 0) {
+      if (adminError || !adminData) {
         setError("No account found with this email");
         setIsLoading(false);
         return;
       }
 
-      // Check password manually
-      const admin = allAdmins[0];
-      console.log("Stored password:", admin.password);
-      console.log("Entered password:", password);
-
-      if (admin.password !== password.trim()) {
+      // Check password
+      if (adminData.password !== password.trim()) {
         setError("Incorrect password");
         setIsLoading(false);
         return;
       }
 
+      // Fetch company data separately
+      const { data: companyData, error: companyError } = await supabase
+        .from("companies")
+        .select("*")
+        .eq("id", adminData.company_id)
+        .single();
+
+      console.log("Company data:", companyData);
+      console.log("Company error:", companyError);
+
+      if (companyError || !companyData) {
+        setError("Company not found");
+        setIsLoading(false);
+        return;
+      }
+
+      // Combine admin + company data
+      const fullAdminData = {
+        ...adminData,
+        companies: companyData
+      };
+
       // Success!
-      onLoginSuccess(admin);
+      onLoginSuccess(fullAdminData);
 
     } catch (err) {
       console.error("Login error:", err);
