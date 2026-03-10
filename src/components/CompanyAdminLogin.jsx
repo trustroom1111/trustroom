@@ -14,22 +14,44 @@ export default function CompanyAdminLogin({ onLogoClick, onLoginSuccess, onBack,
     setIsLoading(true);
 
     try {
-      // Find admin by email and password
-      const { data: adminData, error: adminError } = await supabase
+      // Debug: Log what we're searching for
+      console.log("Searching for email:", email);
+      console.log("Searching for password:", password);
+
+      // First, let's find by email only
+      const { data: allAdmins, error: fetchError } = await supabase
         .from("company_admins")
         .select("*, companies(*)")
-        .eq("email", email)
-        .eq("password", password)
-        .single();
+        .eq("email", email.trim());
 
-      if (adminError || !adminData) {
-        setError("Invalid email or password");
+      console.log("Found admins:", allAdmins);
+      console.log("Fetch error:", fetchError);
+
+      if (fetchError) {
+        setError("Database error. Please try again.");
         setIsLoading(false);
         return;
       }
 
-      // Success - pass company data to parent
-      onLoginSuccess(adminData);
+      if (!allAdmins || allAdmins.length === 0) {
+        setError("No account found with this email");
+        setIsLoading(false);
+        return;
+      }
+
+      // Check password manually
+      const admin = allAdmins[0];
+      console.log("Stored password:", admin.password);
+      console.log("Entered password:", password);
+
+      if (admin.password !== password.trim()) {
+        setError("Incorrect password");
+        setIsLoading(false);
+        return;
+      }
+
+      // Success!
+      onLoginSuccess(admin);
 
     } catch (err) {
       console.error("Login error:", err);
