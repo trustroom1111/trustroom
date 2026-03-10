@@ -7,11 +7,14 @@ import AdminDashboard from "./components/AdminDashboard";
 import TrackSubmission from "./components/TrackSubmission";
 import AboutPage from "./components/AboutPage";
 import ForCompaniesPage from "./components/ForCompaniesPage";
+import CompanyRegister from "./components/CompanyRegister";
+import CompanyRegisterSuccess from "./components/CompanyRegisterSuccess";
 
 function App() {
   const [currentPage, setCurrentPage] = useState("landing");
   const [trackingCode, setTrackingCode] = useState("");
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [registeredCompany, setRegisteredCompany] = useState({ code: "", name: "" });
 
   useEffect(() => {
     const adminStatus = localStorage.getItem("trustroom_admin");
@@ -31,6 +34,11 @@ function App() {
     setCurrentPage("landing");
   };
 
+  const handleCompanyRegisterSuccess = (code, name) => {
+    setRegisteredCompany({ code, name });
+    setCurrentPage("company-register-success");
+  };
+
   const goHome = () => setCurrentPage("landing");
   const goAbout = () => setCurrentPage("about");
   const goForm = () => setCurrentPage("form");
@@ -38,6 +46,29 @@ function App() {
   const goAdmin = () => setCurrentPage("admin");
   const goForCompanies = () => setCurrentPage("for-companies");
   const goCompanyRegister = () => setCurrentPage("company-register");
+
+  // Company Register Success Page
+  if (currentPage === "company-register-success") {
+    return (
+      <CompanyRegisterSuccess
+        companyCode={registeredCompany.code}
+        companyName={registeredCompany.name}
+        onGoToDashboard={goAdmin}
+        onLogoClick={goHome}
+      />
+    );
+  }
+
+  // Company Register Page
+  if (currentPage === "company-register") {
+    return (
+      <CompanyRegister
+        onLogoClick={goHome}
+        onSuccess={handleCompanyRegisterSuccess}
+        onBack={goForCompanies}
+      />
+    );
+  }
 
   // For Companies Page
   if (currentPage === "for-companies") {
