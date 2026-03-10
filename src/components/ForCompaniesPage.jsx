@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 
-export default function ForCompaniesPage({ onLogoClick, onGetStarted, onAboutClick }) {
+export default function ForCompaniesPage({ onLogoClick, onGetStarted, onAboutClick, onCompanyLogin }) {
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       {/* Navigation */}
@@ -16,6 +16,7 @@ export default function ForCompaniesPage({ onLogoClick, onGetStarted, onAboutCli
           <span className="text-teal-400 font-medium">For Companies</span>
           <a href="#pricing" className="text-slate-400 hover:text-white transition-colors">Pricing</a>
           <a href="#contact" className="text-slate-400 hover:text-white transition-colors">Contact</a>
+          <button onClick={onCompanyLogin} className="text-slate-400 hover:text-white transition-colors">Login</button>
           <Button 
             onClick={onGetStarted}
             className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-4 py-2 rounded-lg"
