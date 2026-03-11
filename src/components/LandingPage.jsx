@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import MobileNav from "./MobileNav";
 
 export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick, onLogoClick, onAboutClick, onForCompaniesClick }) {
   
@@ -88,12 +88,23 @@ export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick,
           </div>
           <span className="text-xl font-semibold text-white">TrustRoom</span>
         </button>
+
+        {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-8">
           <button onClick={onAboutClick} className="text-slate-400 hover:text-white transition-colors">About</button>
           <button onClick={onForCompaniesClick} className="text-slate-400 hover:text-white transition-colors">For Companies</button>
           <a href="#how-it-works" className="text-slate-400 hover:text-white transition-colors">How It Works</a>
           <a href="#submit" className="text-slate-400 hover:text-white transition-colors">Submit</a>
         </div>
+
+        {/* Mobile Nav */}
+        <MobileNav
+          onAboutClick={onAboutClick}
+          onForCompaniesClick={onForCompaniesClick}
+          onSubmitClick={onSubmitClick}
+          onTrackClick={onTrackClick}
+          onAdminClick={onAdminClick}
+        />
       </nav>
 
       {/* Hero Section */}
