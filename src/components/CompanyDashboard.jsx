@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "../supabase";
 
@@ -6,8 +6,18 @@ export default function CompanyDashboard({ companyAdmin, onLogout, onLogoClick }
   const [submissions, setSubmissions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
-  const [adminResponse, setAdminResponse] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  
+  // Messages
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
+  
+  // Attachments
+  const [attachments, setAttachments] = useState([]);
+  
+  const messagesEndRef = useRef(null);
+  const MAX_MESSAGES = 10;
 
   const company = companyAdmin.companies;
   const submissionLink = `trustroom.vercel.app/submit/${company.code}`;
@@ -15,6 +25,10 @@ export default function CompanyDashboard({ companyAdmin, onLogout, onLogoClick }
   useEffect(() => {
     fetchSubmissions();
   }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const fetchSubmissions = async () => {
     setIsLoading(true);
@@ -32,6 +46,29 @@ export default function CompanyDashboard({ companyAdmin, onLogout, onLogoClick }
     setIsLoading(false);
   };
 
+  const selectSubmission = async (sub) => {
+    setSelectedSubmission(sub);
+    setNewMessage("");
+    
+    // Fetch messages
+    const { data: messagesData } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("submission_id", sub.id)
+      .order("created_at", { ascending: true });
+    
+    setMessages(messagesData || []);
+
+    // Fetch attachments
+    const { data: attachmentsData } = await supabase
+      .from("attachments")
+      .select("*")
+      .eq("submission_id", sub.id)
+      .order("created_at", { ascending: true });
+    
+    setAttachments(attachmentsData || []);
+  };
+
   const updateStatus = async (id, newStatus) => {
     const { error } = await supabase
       .from("submissions")
@@ -46,27 +83,84 @@ export default function CompanyDashboard({ companyAdmin, onLogout, onLogoClick }
     }
   };
 
-  const saveResponse = async () => {
-    if (!selectedSubmission || !adminResponse.trim()) return;
-
+  const updateCredibility = async (id, credibility) => {
     const { error } = await supabase
       .from("submissions")
-      .update({ 
-        admin_response: adminResponse, 
-        updated_at: new Date().toISOString() 
-      })
-      .eq("id", selectedSubmission.id);
+      .update({ credibility, updated_at: new Date().toISOString() })
+      .eq("id", id);
 
     if (!error) {
-      alert("Response saved!");
       fetchSubmissions();
-      setSelectedSubmission({ ...selectedSubmission, admin_response: adminResponse });
+      if (selectedSubmission?.id === id) {
+        setSelectedSubmission({ ...selectedSubmission, credibility });
+      }
     }
+  };
+
+  const toggleConversationClosed = async (id, currentState) => {
+    const { error } = await supabase
+      .from("submissions")
+      .update({ conversation_closed: !currentState, updated_at: new Date().toISOString() })
+      .eq("id", id);
+
+    if (!error) {
+      fetchSubmissions();
+      if (selectedSubmission?.id === id) {
+        setSelectedSubmission({ ...selectedSubmission, conversation_closed: !currentState });
+      }
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !selectedSubmission) return;
+    if (selectedSubmission.conversation_closed) return;
+    if (messages.length >= MAX_MESSAGES) return;
+
+    setIsSendingMessage(true);
+    
+    const { error: msgError } = await supabase
+      .from("messages")
+      .insert([{
+        submission_id: selectedSubmission.id,
+        sender_type: "admin",
+        message: newMessage.trim(),
+      }]);
+
+    if (!msgError) {
+      const { data: messagesData } = await supabase
+        .from("messages")
+        .select("*")
+        .eq("submission_id", selectedSubmission.id)
+        .order("created_at", { ascending: true });
+      
+      setMessages(messagesData || []);
+      setNewMessage("");
+    }
+    
+    setIsSendingMessage(false);
   };
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
     alert("Copied to clipboard!");
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const filteredSubmissions = submissions.filter((sub) => {
@@ -92,12 +186,22 @@ export default function CompanyDashboard({ companyAdmin, onLogout, onLogoClick }
     dismissed: "bg-slate-500/20 text-slate-400 border-slate-500/30",
   };
 
+  const credibilityLabels = {
+    pending: { label: "Pending Review", color: "bg-slate-500/20 text-slate-400 border-slate-500/30" },
+    substantiated: { label: "Substantiated", color: "bg-green-500/20 text-green-400 border-green-500/30" },
+    unsubstantiated: { label: "Unsubstantiated", color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
+    "insufficient-info": { label: "Insufficient Info", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" },
+    "false-report": { label: "False Report", color: "bg-red-500/20 text-red-400 border-red-500/30" },
+  };
+
   const stats = {
     total: submissions.length,
     new: submissions.filter((s) => s.status === "new").length,
     inReview: submissions.filter((s) => s.status === "in-review").length,
     resolved: submissions.filter((s) => s.status === "resolved").length,
   };
+
+  const canSendMessage = selectedSubmission && !selectedSubmission.conversation_closed && messages.length < MAX_MESSAGES;
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
@@ -224,14 +328,11 @@ export default function CompanyDashboard({ companyAdmin, onLogout, onLogoClick }
           {!isLoading && filteredSubmissions.length > 0 && (
             <div className="grid lg:grid-cols-2 gap-4">
               {/* List */}
-              <div className="space-y-3">
+              <div className="space-y-3 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
                 {filteredSubmissions.map((sub) => (
                   <div
                     key={sub.id}
-                    onClick={() => {
-                      setSelectedSubmission(sub);
-                      setAdminResponse(sub.admin_response || "");
-                    }}
+                    onClick={() => selectSubmission(sub)}
                     className={`p-4 rounded-xl border cursor-pointer transition-all ${
                       selectedSubmission?.id === sub.id
                         ? "bg-slate-800/50 border-teal-500/50"
@@ -239,7 +340,14 @@ export default function CompanyDashboard({ companyAdmin, onLogout, onLogoClick }
                     }`}
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <span className="text-teal-400 font-mono text-sm">{sub.tracking_code}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-teal-400 font-mono text-sm">{sub.tracking_code}</span>
+                        {sub.identity_shared && (
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                            ID Shared
+                          </span>
+                        )}
+                      </div>
                       <span className={`px-2 py-0.5 rounded-full text-xs border ${statusColors[sub.status]}`}>
                         {sub.status === "in-review" ? "In Review" : sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}
                       </span>
@@ -248,89 +356,279 @@ export default function CompanyDashboard({ companyAdmin, onLogout, onLogoClick }
                       {categoryLabels[sub.category] || sub.category}
                     </h4>
                     <p className="text-slate-400 text-sm line-clamp-2">{sub.description}</p>
-                    <p className="text-slate-600 text-xs mt-2">
-                      {new Date(sub.created_at).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <p className="text-slate-600 text-xs">
+                        {new Date(sub.created_at).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                      {sub.conversation_closed && (
+                        <span className="text-xs text-slate-500">🔒 Closed</span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
 
               {/* Detail Panel */}
               {selectedSubmission && (
-                <div className="bg-slate-800/30 border border-slate-700 rounded-xl p-6 h-fit sticky top-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-teal-400 font-mono">{selectedSubmission.tracking_code}</span>
-                    <button
-                      onClick={() => setSelectedSubmission(null)}
-                      className="text-slate-500 hover:text-slate-300"
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  <h3 className="text-xl font-semibold mb-2">
-                    {categoryLabels[selectedSubmission.category] || selectedSubmission.category}
-                  </h3>
-
-                  <div className="flex gap-2 mb-4">
-                    <span className={`px-2 py-0.5 rounded-full text-xs border ${statusColors[selectedSubmission.status]}`}>
-                      {selectedSubmission.status}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full text-xs bg-slate-700 text-slate-300">
-                      {selectedSubmission.severity}
-                    </span>
-                  </div>
-
-                  <div className="bg-slate-900/50 rounded-lg p-4 mb-4">
-                    <p className="text-slate-300 whitespace-pre-wrap">{selectedSubmission.description}</p>
-                  </div>
-
-                  <p className="text-slate-500 text-sm mb-6">
-                    Submitted: {new Date(selectedSubmission.created_at).toLocaleString("en-IN")}
-                  </p>
-
-                  {/* Status Update */}
-                  <div className="mb-6">
-                    <label className="block text-sm text-slate-400 mb-2">Update Status</label>
-                    <div className="flex gap-2">
-                      {["new", "in-review", "resolved", "dismissed"].map((status) => (
-                        <button
-                          key={status}
-                          onClick={() => updateStatus(selectedSubmission.id, status)}
-                          className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
-                            selectedSubmission.status === status
-                              ? statusColors[status]
-                              : "bg-slate-800 text-slate-400 hover:bg-slate-700"
-                          }`}
-                        >
-                          {status === "in-review" ? "In Review" : status.charAt(0).toUpperCase() + status.slice(1)}
-                        </button>
-                      ))}
+                <div className="bg-slate-800/30 border border-slate-700 rounded-xl overflow-hidden max-h-[calc(100vh-200px)] overflow-y-auto">
+                  {/* Header */}
+                  <div className="bg-slate-800/50 px-6 py-4 border-b border-slate-700 sticky top-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-teal-400 font-mono">{selectedSubmission.tracking_code}</span>
+                      <button
+                        onClick={() => setSelectedSubmission(null)}
+                        className="text-slate-500 hover:text-slate-300"
+                      >
+                        ✕
+                      </button>
                     </div>
                   </div>
 
-                  {/* Admin Response */}
-                  <div>
-                    <label className="block text-sm text-slate-400 mb-2">Your Response</label>
-                    <textarea
-                      value={adminResponse}
-                      onChange={(e) => setAdminResponse(e.target.value)}
-                      placeholder="Write a response to the employee..."
-                      className="w-full h-24 px-3 py-2 bg-slate-900/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 resize-none text-sm"
-                    />
-                    <Button
-                      onClick={saveResponse}
-                      className="mt-2 bg-teal-500 hover:bg-teal-600 text-white w-full"
-                    >
-                      Save Response
-                    </Button>
-                    <p className="text-slate-500 text-xs mt-2">
-                      The employee can see this response when they track their submission.
+                  <div className="p-6 space-y-6">
+                    {/* Category & Status */}
+                    <div>
+                      <h3 className="text-xl font-semibold mb-2">
+                        {categoryLabels[selectedSubmission.category] || selectedSubmission.category}
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        <span className={`px-2 py-0.5 rounded-full text-xs border ${statusColors[selectedSubmission.status]}`}>
+                          {selectedSubmission.status}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full text-xs bg-slate-700 text-slate-300">
+                          {selectedSubmission.severity}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-full text-xs border ${credibilityLabels[selectedSubmission.credibility || "pending"].color}`}>
+                          {credibilityLabels[selectedSubmission.credibility || "pending"].label}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Identity Info (if shared) */}
+                    {selectedSubmission.identity_shared && (
+                      <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4">
+                        <h4 className="text-purple-400 font-medium text-sm mb-2">🔓 Identity Disclosed (Confidential)</h4>
+                        <p className="text-white">{selectedSubmission.reporter_name}</p>
+                        {selectedSubmission.reporter_contact && (
+                          <p className="text-slate-400 text-sm">{selectedSubmission.reporter_contact}</p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Description */}
+                    <div>
+                      <h4 className="text-slate-400 text-sm mb-2">Description</h4>
+                      <div className="bg-slate-900/50 rounded-lg p-4">
+                        <p className="text-slate-300 whitespace-pre-wrap">{selectedSubmission.description}</p>
+                      </div>
+                    </div>
+
+                    {/* Incident Details */}
+                    {(selectedSubmission.incident_date || selectedSubmission.incident_location || selectedSubmission.names_involved || selectedSubmission.witnesses) && (
+                      <div className="bg-slate-800/50 rounded-xl p-4 space-y-3">
+                        <h4 className="text-slate-400 text-sm font-medium">Incident Details</h4>
+                        {selectedSubmission.incident_date && (
+                          <div>
+                            <span className="text-slate-500 text-xs">When:</span>
+                            <p className="text-white text-sm">{new Date(selectedSubmission.incident_date).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>
+                          </div>
+                        )}
+                        {selectedSubmission.incident_location && (
+                          <div>
+                            <span className="text-slate-500 text-xs">Where:</span>
+                            <p className="text-white text-sm">{selectedSubmission.incident_location}</p>
+                          </div>
+                        )}
+                        {selectedSubmission.names_involved && (
+                          <div>
+                            <span className="text-slate-500 text-xs">Who was involved:</span>
+                            <p className="text-white text-sm">{selectedSubmission.names_involved}</p>
+                          </div>
+                        )}
+                        {selectedSubmission.witnesses && (
+                          <div>
+                            <span className="text-slate-500 text-xs">Witnesses:</span>
+                            <p className="text-white text-sm">{selectedSubmission.witnesses}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <p className="text-slate-500 text-sm">
+                      Submitted: {formatDate(selectedSubmission.created_at)}
                     </p>
+
+                    {/* Attachments */}
+                    {attachments.length > 0 && (
+                      <div>
+                        <h4 className="text-slate-400 text-sm mb-3">Attachments ({attachments.length})</h4>
+                        <div className="grid grid-cols-2 gap-3">
+                          {attachments.map((att) => (
+                            <div key={att.id}>
+                              {att.file_type === "image" ? (
+                                <a href={att.file_url} target="_blank" rel="noopener noreferrer">
+                                  <img
+                                    src={att.file_url}
+                                    alt="Attachment"
+                                    className="w-full h-24 object-cover rounded-lg border border-slate-600 hover:border-teal-500 transition-colors"
+                                  />
+                                </a>
+                              ) : (
+                                <div className="bg-slate-800 rounded-lg border border-slate-600 p-3">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <svg className="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                    </svg>
+                                    <span className="text-slate-300 text-xs">Voice Note</span>
+                                    {att.duration_seconds && (
+                                      <span className="text-slate-500 text-xs">{formatTime(att.duration_seconds)}</span>
+                                    )}
+                                  </div>
+                                  <audio controls className="w-full h-8" src={att.file_url} />
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Status Update */}
+                    <div>
+                      <label className="block text-sm text-slate-400 mb-2">Update Status</label>
+                      <div className="flex flex-wrap gap-2">
+                        {["new", "in-review", "resolved", "dismissed"].map((status) => (
+                          <button
+                            key={status}
+                            onClick={() => updateStatus(selectedSubmission.id, status)}
+                            className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
+                              selectedSubmission.status === status
+                                ? statusColors[status]
+                                : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                            }`}
+                          >
+                            {status === "in-review" ? "In Review" : status.charAt(0).toUpperCase() + status.slice(1)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Credibility Marking */}
+                    <div>
+                      <label className="block text-sm text-slate-400 mb-2">Mark Credibility</label>
+                      <div className="flex flex-wrap gap-2">
+                        {Object.entries(credibilityLabels).map(([key, { label }]) => (
+                          <button
+                            key={key}
+                            onClick={() => updateCredibility(selectedSubmission.id, key)}
+                            className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
+                              (selectedSubmission.credibility || "pending") === key
+                                ? credibilityLabels[key].color
+                                : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-slate-500 text-xs mt-2">
+                        This helps track investigation outcomes. The reporter cannot see this.
+                      </p>
+                    </div>
+
+                    {/* Conversation Toggle */}
+                    <div>
+                      <Button
+                        onClick={() => toggleConversationClosed(selectedSubmission.id, selectedSubmission.conversation_closed)}
+                        variant="outline"
+                        size="sm"
+                        className={`border-slate-600 ${selectedSubmission.conversation_closed ? "text-green-400" : "text-red-400"}`}
+                      >
+                        {selectedSubmission.conversation_closed ? "🔓 Reopen Conversation" : "🔒 Close Conversation"}
+                      </Button>
+                      <p className="text-slate-500 text-xs mt-2">
+                        {selectedSubmission.conversation_closed 
+                          ? "Conversation is closed. Neither you nor the reporter can send new messages."
+                          : "Closing prevents new messages from both sides."
+                        }
+                      </p>
+                    </div>
+
+                    {/* Messages */}
+                    <div className="border-t border-slate-700 pt-6">
+                      <h4 className="text-slate-400 text-sm mb-3 flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        Conversation ({messages.length}/{MAX_MESSAGES} messages)
+                      </h4>
+
+                      {/* Messages List */}
+                      <div className="space-y-3 max-h-64 overflow-y-auto mb-4">
+                        {messages.length === 0 ? (
+                          <p className="text-slate-500 text-sm text-center py-4">No messages yet. Start the conversation.</p>
+                        ) : (
+                          messages.map((msg) => (
+                            <div
+                              key={msg.id}
+                              className={`flex ${msg.sender_type === "admin" ? "justify-end" : "justify-start"}`}
+                            >
+                              <div
+                                className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                                  msg.sender_type === "admin"
+                                    ? "bg-teal-500/20 border border-teal-500/30"
+                                    : "bg-slate-700/50 border border-slate-600"
+                                }`}
+                              >
+                                <p className="text-sm text-slate-200 whitespace-pre-wrap">{msg.message}</p>
+                                <p className="text-xs text-slate-500 mt-1">
+                                  {msg.sender_type === "admin" ? "You" : "Reporter"} • {formatDate(msg.created_at)}
+                                </p>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                        <div ref={messagesEndRef} />
+                      </div>
+
+                      {/* Send Message */}
+                      {canSendMessage ? (
+                        <div className="flex gap-2">
+                          <textarea
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            placeholder="Type your response..."
+                            className="flex-1 px-3 py-2 bg-slate-900/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 resize-none text-sm"
+                            rows={2}
+                          />
+                          <Button
+                            onClick={sendMessage}
+                            disabled={isSendingMessage || !newMessage.trim()}
+                            className="bg-teal-500 hover:bg-teal-600 text-white"
+                          >
+                            {isSendingMessage ? "..." : "Send"}
+                          </Button>
+                        </div>
+                      ) : (
+                        <p className="text-slate-500 text-sm text-center">
+                          {selectedSubmission.conversation_closed 
+                            ? "Conversation is closed."
+                            : "Message limit reached."
+                          }
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Fair Investigation Note */}
+                    <div className="bg-slate-800/30 border border-slate-600 rounded-xl p-4">
+                      <p className="text-slate-400 text-xs">
+                        ⚖️ <strong>Fair Investigation Reminder:</strong> This is an anonymous report. Please investigate fairly before taking action. 
+                        The accused person also has the right to respond.
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}
