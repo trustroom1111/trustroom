@@ -12,6 +12,10 @@ import CompanyRegisterSuccess from "./components/CompanyRegisterSuccess";
 import CompanyAdminLogin from "./components/CompanyAdminLogin";
 import CompanyDashboard from "./components/CompanyDashboard";
 import CompanySubmissionForm from "./components/CompanySubmissionForm";
+import SignUpPage from "./components/SignUpPage";
+import OnboardingPage from "./components/OnboardingPage";
+import NewDashboard from "./components/NewDashboard";
+import EmployeePortal from "./components/EmployeePortal";
 
 function App() {
   const [currentPage, setCurrentPage] = useState("landing");
@@ -22,12 +26,33 @@ function App() {
   const [companyCode, setCompanyCode] = useState("");
 
   useEffect(() => {
-    // Check URL for company submission link
+    // Check URL for routes
     const path = window.location.pathname;
+
+    const portalMatch = path.match(/^\/portal\/([A-Za-z0-9]+)$/);
+    if (portalMatch) {
+      setCompanyCode(portalMatch[1]);
+      setCurrentPage("employee-portal");
+      return;
+    }
+
     const submitMatch = path.match(/^\/submit\/([A-Za-z0-9]+)$/);
     if (submitMatch) {
       setCompanyCode(submitMatch[1]);
       setCurrentPage("company-submit");
+      return;
+    }
+
+    if (path === "/signup") {
+      setCurrentPage("signup");
+      return;
+    }
+    if (path === "/onboarding") {
+      setCurrentPage("onboarding");
+      return;
+    }
+    if (path === "/dashboard") {
+      setCurrentPage("new-dashboard");
       return;
     }
 
@@ -85,6 +110,84 @@ function App() {
   const goForCompanies = () => setCurrentPage("for-companies");
   const goCompanyRegister = () => setCurrentPage("company-register");
   const goCompanyLogin = () => setCurrentPage("company-login");
+  const goSignUp = () => {
+    setCurrentPage("signup");
+    window.history.pushState({}, "", "/signup");
+  };
+  const goOnboarding = () => {
+    setCurrentPage("onboarding");
+    window.history.pushState({}, "", "/onboarding");
+  };
+  const goNewDashboard = () => {
+    setCurrentPage("new-dashboard");
+    window.history.pushState({}, "", "/dashboard");
+  };
+  const goEmployeePortal = (code) => {
+    setCompanyCode(code);
+    setCurrentPage("employee-portal");
+    window.history.pushState({}, "", `/portal/${code}`);
+  };
+
+  const handleNavigate = (page, code) => {
+    switch (page) {
+      case "signup": goSignUp(); break;
+      case "onboarding": goOnboarding(); break;
+      case "new-dashboard": goNewDashboard(); break;
+      case "employee-portal": goEmployeePortal(code); break;
+      case "company-submit":
+        setCompanyCode(code);
+        setCurrentPage("company-submit");
+        window.history.pushState({}, "", `/submit/${code}`);
+        break;
+      case "company-login": goCompanyLogin(); break;
+      case "track": goTrack(); break;
+      default: goHome();
+    }
+  };
+
+  // Sign Up Page
+  if (currentPage === "signup") {
+    return (
+      <SignUpPage
+        onNavigate={(page) => handleNavigate(page)}
+        onLogoClick={goHome}
+      />
+    );
+  }
+
+  // Onboarding Page
+  if (currentPage === "onboarding") {
+    return (
+      <OnboardingPage
+        onComplete={(code) => {
+          goNewDashboard();
+        }}
+        onLogoClick={goHome}
+      />
+    );
+  }
+
+  // New Dashboard
+  if (currentPage === "new-dashboard") {
+    return (
+      <NewDashboard
+        onLogout={goHome}
+        onLogoClick={goHome}
+        onNavigate={(page, code) => handleNavigate(page, code)}
+      />
+    );
+  }
+
+  // Employee Portal
+  if (currentPage === "employee-portal" && companyCode) {
+    return (
+      <EmployeePortal
+        companyCode={companyCode}
+        onNavigate={(page, code) => handleNavigate(page, code)}
+        onLogoClick={goHome}
+      />
+    );
+  }
 
   // Company Submission Form (from URL)
   if (currentPage === "company-submit" && companyCode) {
@@ -227,6 +330,7 @@ function App() {
       onLogoClick={goHome}
       onAboutClick={goAbout}
       onForCompaniesClick={goForCompanies}
+      onSignUpClick={goSignUp}
     />
   );
 }

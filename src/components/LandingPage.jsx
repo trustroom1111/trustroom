@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import MobileNav from "./MobileNav";
 
-export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick, onLogoClick, onAboutClick, onForCompaniesClick }) {
+export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick, onLogoClick, onAboutClick, onForCompaniesClick, onSignUpClick }) {
   
   const categories = [
     { 
@@ -95,6 +95,12 @@ export default function LandingPage({ onSubmitClick, onAdminClick, onTrackClick,
           <button onClick={onForCompaniesClick} className="text-slate-400 hover:text-white transition-colors">For Companies</button>
           <a href="#how-it-works" className="text-slate-400 hover:text-white transition-colors">How It Works</a>
           <a href="#submit" className="text-slate-400 hover:text-white transition-colors">Submit</a>
+          <button
+            onClick={onSignUpClick}
+            className="bg-teal-500 hover:bg-teal-600 text-white font-medium px-5 py-2 rounded-lg transition-colors"
+          >
+            Sign Up
+          </button>
         </div>
 
         {/* Mobile Nav */}
