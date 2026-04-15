@@ -25,36 +25,77 @@ function App() {
   const [companyAdmin, setCompanyAdmin] = useState(null);
   const [companyCode, setCompanyCode] = useState("");
 
-  useEffect(() => {
-    // Check URL for routes
-    const path = window.location.pathname;
-
-    const portalMatch = path.match(/^\/portal\/([A-Za-z0-9]+)$/);
-    if (portalMatch) {
-      setCompanyCode(portalMatch[1]);
-      setCurrentPage("employee-portal");
-      return;
+  // Map page names to URL paths
+  const getUrlForPage = (page, code) => {
+    switch (page) {
+      case "landing": return "/";
+      case "signup": return "/signup";
+      case "onboarding": return "/onboarding";
+      case "new-dashboard": return "/dashboard";
+      case "employee-portal": return `/portal/${code}`;
+      case "company-submit": return `/submit/${code}`;
+      case "about": return "/about";
+      case "form": return "/form";
+      case "track": return "/track";
+      case "admin": return "/admin";
+      case "for-companies": return "/for-companies";
+      case "company-register": return "/company-register";
+      case "company-login": return "/company-login";
+      case "company-register-success": return "/company-register-success";
+      case "company-dashboard": return "/company-dashboard";
+      case "confirmation": return "/confirmation";
+      default: return "/";
     }
+  };
+
+  // Resolve a URL path to { page, code }
+  const resolvePathToPage = (path) => {
+    const portalMatch = path.match(/^\/portal\/([A-Za-z0-9]+)$/);
+    if (portalMatch) return { page: "employee-portal", code: portalMatch[1] };
 
     const submitMatch = path.match(/^\/submit\/([A-Za-z0-9]+)$/);
-    if (submitMatch) {
-      setCompanyCode(submitMatch[1]);
-      setCurrentPage("company-submit");
-      return;
-    }
+    if (submitMatch) return { page: "company-submit", code: submitMatch[1] };
 
-    if (path === "/signup") {
-      setCurrentPage("signup");
-      return;
-    }
-    if (path === "/onboarding") {
-      setCurrentPage("onboarding");
-      return;
-    }
-    if (path === "/dashboard") {
-      setCurrentPage("new-dashboard");
-      return;
-    }
+    const simpleRoutes = {
+      "/": "landing",
+      "/signup": "signup",
+      "/onboarding": "onboarding",
+      "/dashboard": "new-dashboard",
+      "/about": "about",
+      "/form": "form",
+      "/track": "track",
+      "/admin": "admin",
+      "/for-companies": "for-companies",
+      "/company-register": "company-register",
+      "/company-login": "company-login",
+      "/company-register-success": "company-register-success",
+      "/company-dashboard": "company-dashboard",
+      "/confirmation": "confirmation",
+    };
+
+    return { page: simpleRoutes[path] || "landing", code: "" };
+  };
+
+  // Central navigation — pushes history state for every page change
+  const navigateTo = (page, code) => {
+    if (code) setCompanyCode(code);
+    setCurrentPage(page);
+    const url = getUrlForPage(page, code);
+    window.history.pushState({ page, code: code || "" }, "", url);
+  };
+
+  // Apply a history state without pushing (used by popstate and initial load)
+  const applyState = (page, code) => {
+    if (code) setCompanyCode(code);
+    setCurrentPage(page);
+  };
+
+  // Initial load: resolve URL and replace current history entry with state
+  useEffect(() => {
+    const { page, code } = resolvePathToPage(window.location.pathname);
+    if (code) setCompanyCode(code);
+    setCurrentPage(page);
+    window.history.replaceState({ page, code: code || "" }, "", window.location.pathname);
 
     // Check super admin
     const adminStatus = localStorage.getItem("trustroom_admin");
@@ -69,80 +110,65 @@ function App() {
     }
   }, []);
 
+  // Listen for browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = (event) => {
+      if (event.state && event.state.page) {
+        applyState(event.state.page, event.state.code);
+      } else {
+        // Fallback: resolve from URL
+        const { page, code } = resolvePathToPage(window.location.pathname);
+        applyState(page, code);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   const handleSubmitSuccess = (code) => {
     setTrackingCode(code);
-    setCurrentPage("confirmation");
-    // Clear URL
-    window.history.pushState({}, "", "/");
+    navigateTo("confirmation");
   };
 
   const handleAdminLogout = () => {
     localStorage.removeItem("trustroom_admin");
     setIsAdminLoggedIn(false);
-    setCurrentPage("landing");
+    navigateTo("landing");
   };
 
   const handleCompanyRegisterSuccess = (code, name) => {
     setRegisteredCompany({ code, name });
-    setCurrentPage("company-register-success");
+    navigateTo("company-register-success");
   };
 
   const handleCompanyAdminLogin = (adminData) => {
     setCompanyAdmin(adminData);
     localStorage.setItem("trustroom_company_admin", JSON.stringify(adminData));
-    setCurrentPage("company-dashboard");
+    navigateTo("company-dashboard");
   };
 
   const handleCompanyAdminLogout = () => {
     setCompanyAdmin(null);
     localStorage.removeItem("trustroom_company_admin");
-    setCurrentPage("landing");
+    navigateTo("landing");
   };
 
-  const goHome = () => {
-    setCurrentPage("landing");
-    window.history.pushState({}, "", "/");
-  };
-  const goAbout = () => setCurrentPage("about");
-  const goForm = () => setCurrentPage("form");
-  const goTrack = () => setCurrentPage("track");
-  const goAdmin = () => setCurrentPage("admin");
-  const goForCompanies = () => setCurrentPage("for-companies");
-  const goCompanyRegister = () => setCurrentPage("company-register");
-  const goCompanyLogin = () => setCurrentPage("company-login");
-  const goSignUp = () => {
-    setCurrentPage("signup");
-    window.history.pushState({}, "", "/signup");
-  };
-  const goOnboarding = () => {
-    setCurrentPage("onboarding");
-    window.history.pushState({}, "", "/onboarding");
-  };
-  const goNewDashboard = () => {
-    setCurrentPage("new-dashboard");
-    window.history.pushState({}, "", "/dashboard");
-  };
-  const goEmployeePortal = (code) => {
-    setCompanyCode(code);
-    setCurrentPage("employee-portal");
-    window.history.pushState({}, "", `/portal/${code}`);
-  };
+  const goHome = () => navigateTo("landing");
+  const goAbout = () => navigateTo("about");
+  const goForm = () => navigateTo("form");
+  const goTrack = () => navigateTo("track");
+  const goAdmin = () => navigateTo("admin");
+  const goForCompanies = () => navigateTo("for-companies");
+  const goCompanyRegister = () => navigateTo("company-register");
+  const goCompanyLogin = () => navigateTo("company-login");
+  const goSignUp = () => navigateTo("signup");
+  const goOnboarding = () => navigateTo("onboarding");
+  const goNewDashboard = () => navigateTo("new-dashboard");
+  const goEmployeePortal = (code) => navigateTo("employee-portal", code);
 
   const handleNavigate = (page, code) => {
-    switch (page) {
-      case "signup": goSignUp(); break;
-      case "onboarding": goOnboarding(); break;
-      case "new-dashboard": goNewDashboard(); break;
-      case "employee-portal": goEmployeePortal(code); break;
-      case "company-submit":
-        setCompanyCode(code);
-        setCurrentPage("company-submit");
-        window.history.pushState({}, "", `/submit/${code}`);
-        break;
-      case "company-login": goCompanyLogin(); break;
-      case "track": goTrack(); break;
-      default: goHome();
-    }
+    navigateTo(page, code);
   };
 
   // Sign Up Page

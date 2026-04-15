@@ -1,17 +1,66 @@
 import { useState, useEffect } from "react";
+import { supabase } from "../supabase";
 
 export default function EmployeePortal({ companyCode, onNavigate, onLogoClick }) {
   const [companyName, setCompanyName] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("trustroom_onboarding");
-    if (saved) {
-      const data = JSON.parse(saved);
-      if (data.companyCode === companyCode) {
-        setCompanyName(data.companyName);
+    const verifyCompany = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("companies")
+          .select("name")
+          .eq("code", companyCode)
+          .single();
+
+        if (error || !data) {
+          setNotFound(true);
+        } else {
+          setCompanyName(data.name);
+        }
+      } catch (err) {
+        console.error("Error verifying company:", err);
+        setNotFound(true);
       }
-    }
+      setLoading(false);
+    };
+
+    verifyCompany();
   }, [companyCode]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
+        <p className="text-slate-400">Loading...</p>
+      </div>
+    );
+  }
+
+  if (notFound) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
+        <div className="text-center px-6">
+          <button onClick={onLogoClick} className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity mb-6">
+            <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-teal-600 rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold text-xl">T</span>
+            </div>
+          </button>
+          <h1 className="text-2xl font-bold mb-3">Company Not Found</h1>
+          <p className="text-slate-400 mb-6">
+            The company code <span className="font-mono text-slate-300">{companyCode}</span> does not exist. Please check the link and try again.
+          </p>
+          <button
+            onClick={onLogoClick}
+            className="text-teal-400 hover:underline"
+          >
+            Go to homepage
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
@@ -26,11 +75,6 @@ export default function EmployeePortal({ companyCode, onNavigate, onLogoClick })
           {companyName && (
             <div className="inline-flex items-center gap-2 bg-teal-500/10 border border-teal-500/30 rounded-full px-4 py-2 mb-4">
               <span className="text-sm text-teal-400">{companyName}</span>
-            </div>
-          )}
-          {!companyName && companyCode && (
-            <div className="inline-flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-full px-4 py-2 mb-4">
-              <span className="text-sm text-slate-400 font-mono">{companyCode}</span>
             </div>
           )}
           <h1 className="text-3xl md:text-4xl font-bold mb-3">Your Voice Matters</h1>

@@ -1,16 +1,50 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "../supabase";
 
 export default function NewDashboard({ onLogout, onLogoClick, onNavigate }) {
   const [companyData, setCompanyData] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [submissions, setSubmissions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const saved = localStorage.getItem("trustroom_onboarding");
     if (saved) {
-      setCompanyData(JSON.parse(saved));
+      const data = JSON.parse(saved);
+      setCompanyData(data);
+      fetchSubmissions(data.companyId);
+    } else {
+      setLoading(false);
     }
   }, []);
+
+  const fetchSubmissions = async (companyId) => {
+    if (!companyId) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const { data, error } = await supabase
+        .from("submissions")
+        .select("*")
+        .eq("company_id", companyId)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Fetch submissions error:", error);
+      } else {
+        setSubmissions(data || []);
+      }
+    } catch (err) {
+      console.error("Error fetching submissions:", err);
+    }
+    setLoading(false);
+  };
+
+  const totalCount = submissions.length;
+  const openCount = submissions.filter((s) => s.status !== "resolved").length;
+  const resolvedCount = submissions.filter((s) => s.status === "resolved").length;
 
   const portalLink = companyData
     ? `trustroom.vercel.app/portal/${companyData.companyCode}`
@@ -78,17 +112,17 @@ export default function NewDashboard({ onLogout, onLogoClick, onNavigate }) {
         {/* Stats Row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
-            { label: "Total Submissions", value: "0", icon: (
+            { label: "Total Submissions", value: String(totalCount), icon: (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             )},
-            { label: "Open Cases", value: "0", icon: (
+            { label: "Open Cases", value: String(openCount), icon: (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             )},
-            { label: "Resolved", value: "0", icon: (
+            { label: "Resolved", value: String(resolvedCount), icon: (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -119,23 +153,69 @@ export default function NewDashboard({ onLogout, onLogoClick, onNavigate }) {
               <div className="px-6 py-4 border-b border-slate-800">
                 <h2 className="text-lg font-semibold">Recent Submissions</h2>
               </div>
-              <div className="p-12 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-slate-800 rounded-full flex items-center justify-center">
-                  <svg className="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                  </svg>
+              {loading ? (
+                <div className="p-12 text-center">
+                  <p className="text-slate-400">Loading submissions...</p>
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">No submissions yet</h3>
-                <p className="text-slate-400 mb-6 max-w-sm mx-auto">
-                  Share your employee portal link to get started. Employees can submit concerns anonymously.
-                </p>
-                <Button
-                  onClick={copyLink}
-                  className="bg-teal-500 hover:bg-teal-600 text-white"
-                >
-                  {copied ? "Copied!" : "Copy Portal Link"}
-                </Button>
-              </div>
+              ) : submissions.length === 0 ? (
+                <div className="p-12 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-slate-800 rounded-full flex items-center justify-center">
+                    <svg className="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2">No submissions yet</h3>
+                  <p className="text-slate-400 mb-6 max-w-sm mx-auto">
+                    Share your employee portal link to get started. Employees can submit concerns anonymously.
+                  </p>
+                  <Button
+                    onClick={copyLink}
+                    className="bg-teal-500 hover:bg-teal-600 text-white"
+                  >
+                    {copied ? "Copied!" : "Copy Portal Link"}
+                  </Button>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-800">
+                  {submissions.slice(0, 10).map((sub) => (
+                    <div key={sub.id} className="px-6 py-4 flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-1">
+                          <span className="text-white font-medium truncate">
+                            {sub.category || "Uncategorized"}
+                          </span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${
+                            sub.severity === "high"
+                              ? "bg-red-500/10 text-red-400"
+                              : sub.severity === "medium"
+                              ? "bg-yellow-500/10 text-yellow-400"
+                              : "bg-green-500/10 text-green-400"
+                          }`}>
+                            {sub.severity || "low"}
+                          </span>
+                        </div>
+                        <p className="text-slate-400 text-sm truncate">
+                          {sub.description || sub.message || "No description"}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-4 ml-4">
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          sub.status === "resolved"
+                            ? "bg-green-500/10 text-green-400"
+                            : sub.status === "in_progress"
+                            ? "bg-blue-500/10 text-blue-400"
+                            : "bg-slate-700/50 text-slate-400"
+                        }`}>
+                          {sub.status === "in_progress" ? "In Progress" : sub.status === "resolved" ? "Resolved" : "Open"}
+                        </span>
+                        <span className="text-slate-500 text-xs whitespace-nowrap">
+                          {new Date(sub.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -187,12 +267,15 @@ export default function NewDashboard({ onLogout, onLogoClick, onNavigate }) {
               <div className="mb-6">
                 <h4 className="text-slate-400 text-sm mb-3">Categories</h4>
                 <div className="space-y-2">
-                  {categories.map((cat) => (
-                    <div key={cat} className="flex items-center justify-between">
-                      <span className="text-slate-400 text-sm">{cat}</span>
-                      <span className="text-slate-600 text-sm font-mono">0</span>
-                    </div>
-                  ))}
+                  {categories.map((cat) => {
+                    const count = submissions.filter((s) => s.category === cat).length;
+                    return (
+                      <div key={cat} className="flex items-center justify-between">
+                        <span className="text-slate-400 text-sm">{cat}</span>
+                        <span className={`text-sm font-mono ${count > 0 ? "text-white" : "text-slate-600"}`}>{count}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -200,12 +283,15 @@ export default function NewDashboard({ onLogout, onLogoClick, onNavigate }) {
               <div>
                 <h4 className="text-slate-400 text-sm mb-3">Severity</h4>
                 <div className="space-y-2">
-                  {severities.map((sev) => (
-                    <div key={sev.label} className="flex items-center justify-between">
-                      <span className={`text-sm ${sev.color}`}>{sev.label}</span>
-                      <span className="text-slate-600 text-sm font-mono">0</span>
-                    </div>
-                  ))}
+                  {severities.map((sev) => {
+                    const count = submissions.filter((s) => (s.severity || "").toLowerCase() === sev.label.toLowerCase()).length;
+                    return (
+                      <div key={sev.label} className="flex items-center justify-between">
+                        <span className={`text-sm ${sev.color}`}>{sev.label}</span>
+                        <span className={`text-sm font-mono ${count > 0 ? "text-white" : "text-slate-600"}`}>{count}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>

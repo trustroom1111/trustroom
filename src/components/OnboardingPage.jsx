@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "../supabase";
 
 export default function OnboardingPage({ onComplete, onLogoClick }) {
   const [companyName, setCompanyName] = useState("");
@@ -7,6 +8,7 @@ export default function OnboardingPage({ onComplete, onLogoClick }) {
   const [industry, setIndustry] = useState("");
   const [employeeCount, setEmployeeCount] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const industries = [
     "Technology",
@@ -30,7 +32,7 @@ export default function OnboardingPage({ onComplete, onLogoClick }) {
     return prefix + digits;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -43,20 +45,73 @@ export default function OnboardingPage({ onComplete, onLogoClick }) {
       return;
     }
 
-    const companyCode = generateCompanyCode(companyName);
+    setIsSubmitting(true);
 
-    localStorage.setItem(
-      "trustroom_onboarding",
-      JSON.stringify({
-        companyName: companyName.trim(),
-        email: email.trim(),
-        industry,
-        employeeCount,
-        companyCode,
-      })
-    );
+    try {
+      const companyCode = generateCompanyCode(companyName);
 
-    onComplete(companyCode);
+      // Insert company into Supabase
+      const { data: companyData, error: companyError } = await supabase
+        .from("companies")
+        .insert([
+          {
+            name: companyName.trim(),
+            code: companyCode,
+            email: email.trim(),
+            industry: industry || null,
+            employee_count: employeeCount || null,
+          },
+        ])
+        .select()
+        .single();
+
+      if (companyError) {
+        console.error("Company error:", companyError);
+        setError("Failed to create company. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Insert company admin into Supabase
+      const randomPassword = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      const { error: adminError } = await supabase
+        .from("company_admins")
+        .insert([
+          {
+            company_id: companyData.id,
+            email: email.trim(),
+            password: randomPassword,
+            name: companyName.trim(),
+            role: "admin",
+          },
+        ]);
+
+      if (adminError) {
+        console.error("Admin error:", adminError);
+        setError("Failed to create admin account. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Store in localStorage for dashboard
+      localStorage.setItem(
+        "trustroom_onboarding",
+        JSON.stringify({
+          companyName: companyName.trim(),
+          email: email.trim(),
+          industry,
+          employeeCount,
+          companyCode,
+          companyId: companyData.id,
+        })
+      );
+
+      onComplete(companyCode);
+    } catch (err) {
+      console.error("Error:", err);
+      setError("Something went wrong. Please try again.");
+      setIsSubmitting(false);
+    }
   };
 
   const inputClass =
@@ -178,9 +233,10 @@ export default function OnboardingPage({ onComplete, onLogoClick }) {
             {/* Submit */}
             <Button
               type="submit"
+              disabled={isSubmitting}
               className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white py-6 text-lg rounded-xl mt-2"
             >
-              Continue
+              {isSubmitting ? "Setting up..." : "Continue"}
             </Button>
           </form>
         </div>
